@@ -43,6 +43,18 @@ class _PixabayPageState extends State<PixabayPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      body: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3, // 横に並べる数
+        ),
+        itemCount: imageList.length, // 要素数
+        itemBuilder: (context, index) {
+          Map<String, dynamic> image = imageList[index];
+          // URLをつかった画像表示は Image.network(表示したいURL) 
+          return Image.network(image['previewURL']);
+        },
+      ),
+    );
   }
 }
