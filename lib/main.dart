@@ -66,7 +66,15 @@ class _PixabayPageState extends State<PixabayPage> {
         itemBuilder: (context, index) {
           Map<String, dynamic> image = imageList[index];
           // URLをつかった画像表示は Image.network(表示したいURL) 
-          return Image.network(image['previewURL']);
+          return Stack(
+            children: [
+              Image.network(image['previewURL']),
+              Container(
+                color: Colors.white,
+                child: Text('${image['likes']}'),
+              ),
+            ],
+          );
         },
       ),
     );
