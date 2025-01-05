@@ -67,11 +67,31 @@ class _PixabayPageState extends State<PixabayPage> {
           Map<String, dynamic> image = imageList[index];
           // URLをつかった画像表示は Image.network(表示したいURL) 
           return Stack(
+            // 領域いっぱいに広がる
+            fit: StackFit.expand,
             children: [
-              Image.network(image['previewURL']),
-              Container(
-                color: Colors.white,
-                child: Text('${image['likes']}'),
+              Image.network(
+                image['previewURL'],
+                // 領域いっぱいに広がる
+                fit: BoxFit.fill,
+              ),
+              Align(
+                // 左上ではなく右下に表示
+                alignment: Alignment.bottomRight,
+                child: Container(
+                  color: Colors.white,
+                  child: Row(
+                    // 必要最小限のサイズに縮小
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.thumb_up_alt_outlined,
+                        size: 14,
+                      ),
+                      Text('${image['likes']}'),
+                    ],
+                  ),
+                ),
               ),
             ],
           );
