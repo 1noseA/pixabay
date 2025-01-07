@@ -24,7 +24,7 @@ class PixabayPage extends StatefulWidget {
 }
 
 class _PixabayPageState extends State<PixabayPage> {
-  List imageList = [];
+  List<PixabayImage> pixabayImages = [];
 
   Future<void> fetchImages(String text) async {
     final response = await Dio().get(
@@ -36,7 +36,10 @@ class _PixabayPageState extends State<PixabayPage> {
         'per_page': 100,
       },
     );
-    imageList = response.data['hits'];
+    // この時点では要素の中身の型は Map<String, dynamic>
+    final List hits = response.data['hits'];
+    // map メソッドを使って Map<String, dynamic> の型を一つひとつ PixabayImage 型に変換していきます。
+    pixabayImages = hits.map((e) => PixabayImage.fromMap(e)).toList();
     setState(() {});
   }
 
@@ -68,21 +71,17 @@ class _PixabayPageState extends State<PixabayPage> {
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3, // 横に並べる数
         ),
-        itemCount: imageList.length, // 要素数
+        itemCount: pixabayImages.length, // 要素数
         itemBuilder: (context, index) {
-          Map<String, dynamic> image = imageList[index];
+          final pixabayImage = pixabayImages[index];
           // URLをつかった画像表示は Image.network(表示したいURL) 
           return InkWell(
-            onTap: () {
-              // ignore: avoid_print
-              print(image['likes']);
-            },
             child: Stack(
               // 領域いっぱいに広がる
               fit: StackFit.expand,
               children: [
                 Image.network(
-                  image['previewURL'],
+                  pixabayImage.previewURL,
                   // 領域いっぱいに広がる
                   fit: BoxFit.fill,
                 ),
@@ -99,7 +98,7 @@ class _PixabayPageState extends State<PixabayPage> {
                           Icons.thumb_up_alt_outlined,
                           size: 14,
                         ),
-                        Text('${image['likes']}'),
+                        Text('${pixabayImage.likes}'),
                       ],
                     ),
                   ),
@@ -109,6 +108,25 @@ class _PixabayPageState extends State<PixabayPage> {
           );
         },
       ),
+    );
+  }
+}
+
+class PixabayImage {
+  final String previewURL;
+  final int likes;
+
+  // コンストラクタ（名前付き引数を渡せる）
+  PixabayImage({
+    required this.previewURL,
+    required this.likes,
+  });
+  
+  // 引数として Map を受け取り PixabayImage のインスタンス作成
+  factory PixabayImage.fromMap(Map<String, dynamic> map) {
+    return PixabayImage(
+      previewURL: map['previewURL'],
+      likes: map['likes'],
     );
   }
 }
