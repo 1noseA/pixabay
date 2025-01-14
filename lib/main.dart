@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 void main() {
   runApp(const MyApp());
@@ -45,6 +49,21 @@ class _PixabayPageState extends State<PixabayPage> {
     setState(() {});
   }
 
+  Future<void> shareImage(String url) async {
+    final dir = await getTemporaryDirectory();
+
+    final response = await Dio().get(
+      url,
+      options: Options(
+        responseType: ResponseType.bytes,
+      ),
+    );
+
+    final imageFile = await File('${dir.path}/image.png').writeAsBytes(response.data);
+
+    await Share.shareXFiles([XFile(imageFile.path)], text: 'image');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -78,6 +97,9 @@ class _PixabayPageState extends State<PixabayPage> {
           final pixabayImage = pixabayImages[index];
           // URLをつかった画像表示は Image.network(表示したいURL) 
           return InkWell(
+            onTap: () async {
+              shareImage(pixabayImage.webformatURL);
+            },
             child: Stack(
               // 領域いっぱいに広がる
               fit: StackFit.expand,
@@ -117,11 +139,13 @@ class _PixabayPageState extends State<PixabayPage> {
 class PixabayImage {
   final String previewURL;
   final int likes;
+  final String webformatURL;
 
   // コンストラクタ（名前付き引数を渡せる）
   PixabayImage({
     required this.previewURL,
     required this.likes,
+    required this.webformatURL,
   });
   
   // 引数として Map を受け取り PixabayImage のインスタンス作成
@@ -129,6 +153,7 @@ class PixabayImage {
     return PixabayImage(
       previewURL: map['previewURL'],
       likes: map['likes'],
+      webformatURL: map['webformatURL'],
     );
   }
 }
